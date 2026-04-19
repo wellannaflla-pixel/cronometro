@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <button onclick="enviar('iniciar')">INICIAR JOGO</button>
+    <button onclick="enviar('acrescentar3')" style="background-color: orange;">+3 MINUTOS (Única vez)</button>
+    <button onclick="enviar('resetar')" style="background-color: red; color: white;">RESETAR</button>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        function enviar(cmd) { socket.emit('comando', cmd); }
+    </script>
+</body>
+</html>

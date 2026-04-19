@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Placar Futsal</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { background: black; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; font-size: 30vh; font-family: sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="display">10:00</div>
+    <script>
+    const socket = io();
+    let tempo = 600; // 10 minutos
+    let acrescimoUsado = false;
+    let rodando = false;
+    let timer;
+
+    const display = document.getElementById('display');
+
+    function atualizarDisplay() {
+        let m = Math.floor(tempo / 60);
+        let s = tempo % 60;
+        display.innerText = `${m}:${s < 10 ? '0'+s : s}`;
+    }
+
+    socket.on('comando', (cmd) => {
+        if (cmd === 'iniciar' && !rodando) {
+            rodando = true;
+            timer = setInterval(() => {
+                if (tempo > 0) {
+                    tempo--;
+                    atualizarDisplay();
+                } else {
+                    clearInterval(timer);
+                    rodando = false;
+                    alert("TEMPO ENCERRADO!"); // Sirene aqui depois
+                    // ... dentro do setInterval
+if (tempo > 0) {
+    tempo--;
+    atualizarDisplay();
+} else {
+    clearInterval(timer);
+    rodando = false;
+    
+    // Tocar a sirene
+    document.getElementById('somSirene').play();
+    
+    // Efeito visual de alerta
+    document.body.style.backgroundColor = "red";
+    setTimeout(() => { document.body.style.backgroundColor = "black"; }, 3000);
+    
+    alert("FIM DE JOGO!");
+}
+                }
+            }, 1000);
+        }
+        
+        if (cmd === 'acrescentar3' && !acrescimoUsado) {
+            tempo += 180; // Adiciona 3 minutos
+            acrescimoUsado = true; // Bloqueia para não usar de novo
+            atualizarDisplay();
+        }
+
+        if (cmd === 'resetar') {
+            tempo = 600;
+            acrescimoUsado = false;
+            atualizarDisplay();
+            clearInterval(timer);
+            rodando = false;
+        }
+    });
+</script>
+</body>
+<audio id="somSirene" src="sirene.mp3"></audio>
+</html>
