@@ -6,23 +6,22 @@
     <script src="/socket.io/socket.io.js"></script>
     <style>
         body { 
-    background: black; 
-    color: white; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    height: 100vh; 
-    margin: 0; 
-    overflow: hidden; /* Remove barras de rolagem */
-    transition: background-color 0.5s; 
-}
-
-#display { 
-    font-size: 40vw; /* Ajusta o tamanho da fonte proporcionalmente à largura da tela */
-    font-family: 'Courier New', monospace; /* Fonte monoespaçada para os números não "pularem" */
-    font-weight: bold;
-    line-height: 1;
-}
+            background: black; 
+            color: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            overflow: hidden; 
+            transition: background-color 0.5s; 
+        }
+        #display { 
+            font-size: 40vw; 
+            font-family: 'Courier New', monospace; 
+            font-weight: bold;
+            line-height: 1;
+        }
     </style>
 </head>
 <body>
@@ -41,6 +40,7 @@
 
             function autorizarAudio() {
                 if (!somAutorizado && sirene) {
+                    // CORREÇÃO: Adicionado () antes da arrow function '=>'
                     sirene.play().then(() => {
                         sirene.pause();
                         sirene.currentTime = 0;
@@ -48,11 +48,11 @@
                         document.body.removeEventListener('click', autorizarAudio);
 
                         if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => {
-            console.log(`Erro ao tentar tela cheia: ${err.message}`);
-        });
-
-                    }).catch(e => console.log("Aguardando interação...", e));
+                            document.documentElement.requestFullscreen().catch(err => {
+                                console.log(`Erro ao tentar tela cheia: ${err.message}`);
+                            });
+                        }
+                    }).catch(e => console.log("Aguardando interação:", e));
                 }
             }
             document.body.addEventListener('click', autorizarAudio);
