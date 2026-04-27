@@ -1,12 +1,22 @@
-<script>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Placar Futsal</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { background: black; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; font-size: 30vh; font-family: sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="display">10:00</div>
+    <script>
     const socket = io();
-    let tempo = 3; 
+    let tempo = 5; // 10 minutos
     let acrescimoUsado = false;
     let rodando = false;
     let timer;
 
     const display = document.getElementById('display');
-    const sirene = document.getElementById('somSirene');
 
     function atualizarDisplay() {
         let m = Math.floor(tempo / 60);
@@ -24,20 +34,31 @@
                 } else {
                     clearInterval(timer);
                     rodando = false;
-                    
-                    // Tenta tocar o som
-                    sirene.play().catch(e => console.log("Navegador bloqueou o som: interaja com a página antes!"));
-                    
-                    document.body.style.backgroundColor = "red";
-                    setTimeout(() => { document.body.style.backgroundColor = "black"; }, 3000);
-                    alert("FIM DE JOGO!");
+                    alert("TEMPO ENCERRADO!"); // Sirene aqui depois
+                    // ... dentro do setInterval
+if (tempo > 0) {
+    tempo--;
+    atualizarDisplay();
+} else {
+    clearInterval(timer);
+    rodando = false;
+    
+    // Tocar a sirene
+    document.getElementById('somSirene').play();
+    
+    // Efeito visual de alerta
+    document.body.style.backgroundColor = "red";
+    setTimeout(() => { document.body.style.backgroundColor = "black"; }, 3000);
+    
+    alert("FIM DE JOGO!");
+}
                 }
             }, 1000);
         }
         
         if (cmd === 'acrescentar3' && !acrescimoUsado) {
-            tempo += 180;
-            acrescimoUsado = true;
+            tempo += 180; // Adiciona 3 minutos
+            acrescimoUsado = true; // Bloqueia para não usar de novo
             atualizarDisplay();
         }
 
@@ -47,7 +68,9 @@
             atualizarDisplay();
             clearInterval(timer);
             rodando = false;
-            document.body.style.backgroundColor = "black";
         }
     });
 </script>
+</body>
+<audio id="somSirene" src="sirene.mp3"></audio>
+</html>
