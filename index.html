@@ -9,7 +9,7 @@
     </style>
 </head>
 <body>
-    <div id="display">10:00</div>
+    <div id="display">00:05</div>
     <audio id="somSirene" src="sirene.mp3"></audio>
 
     <script>
@@ -17,7 +17,7 @@
             const socket = io();
             const sirene = document.getElementById('somSirene');
             const display = document.getElementById('display');
-            let tempo = 600;
+            let tempo = 5;
             let rodando = false;
             let timer;
             let somAutorizado = false;
@@ -58,7 +58,7 @@
                 }
                 if (cmd === 'resetar' || cmd === 'acrescentar3') {
                     if (sirene) { sirene.pause(); sirene.currentTime = 0; }
-                    if (cmd === 'resetar') { tempo = 600; clearInterval(timer); rodando = false; }
+                    if (cmd === 'resetar') { tempo = 5; clearInterval(timer); rodando = false; }
                     if (cmd === 'acrescentar3') { tempo += 180; }
                     atualizarDisplay();
                     document.body.style.backgroundColor = "black";
