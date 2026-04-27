@@ -2,7 +2,10 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
-    cors: { origin: "*" }
+    cors: {
+        origin: "*", // Permite conexões de qualquer lugar
+        methods: ["GET", "POST"]
+    }
 });
 
 app.use(express.static(__dirname));
