@@ -14,8 +14,20 @@
             height: 100vh; 
             margin: 0; 
             overflow: hidden; 
-            transition: background-color 0.5s; 
+            transition: background-color 0.2s; 
         }
+
+        /* Animação de piscar */
+        @keyframes piscar {
+            0% { background-color: red; }
+            50% { background-color: black; }
+            100% { background-color: red; }
+        }
+
+        .piscar-vermelho {
+            animation: piscar 0.5s infinite;
+        }
+
         #display { 
             font-size: 40vw; 
             font-family: 'Courier New', monospace; 
@@ -40,7 +52,6 @@
 
             function autorizarAudio() {
                 if (!somAutorizado && sirene) {
-                    // CORREÇÃO: Adicionado () antes da arrow function '=>'
                     sirene.play().then(() => {
                         sirene.pause();
                         sirene.currentTime = 0;
@@ -48,9 +59,7 @@
                         document.body.removeEventListener('click', autorizarAudio);
 
                         if (!document.fullscreenElement) {
-                            document.documentElement.requestFullscreen().catch(err => {
-                                console.log(`Erro ao tentar tela cheia: ${err.message}`);
-                            });
+                            document.documentElement.requestFullscreen().catch(err => console.log(err));
                         }
                     }).catch(e => console.log("Aguardando interação:", e));
                 }
@@ -73,14 +82,25 @@
                         } else {
                             clearInterval(timer);
                             rodando = false;
+                            
+                            // Toca o som
                             if (sirene) sirene.play();
-                            document.body.style.backgroundColor = "red";
-                            setTimeout(() => { document.body.style.backgroundColor = "black"; }, 3000);
+                            
+                            // Ativa a classe que faz piscar
+                            document.body.classList.add('piscar-vermelho');
+                            
+                            // Para de piscar após 5 segundos
+                            setTimeout(() => { 
+                                document.body.classList.remove('piscar-vermelho');
+                                document.body.style.backgroundColor = "black";
+                            }, 5000);
                         }
                     }, 1000);
                 }
+                
                 if (cmd === 'resetar' || cmd === 'acrescentar3') {
                     if (sirene) { sirene.pause(); sirene.currentTime = 0; }
+                    document.body.classList.remove('piscar-vermelho'); // Para de piscar se resetar
                     if (cmd === 'resetar') { tempo = 5; clearInterval(timer); rodando = false; }
                     if (cmd === 'acrescentar3') { tempo += 180; }
                     atualizarDisplay();
