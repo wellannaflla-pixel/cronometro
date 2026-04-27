@@ -1,25 +1,15 @@
 const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
-const path = require('path');
+const io = require('socket.io')(http); // Sem opções extras, o Socket.io se auto-configura
 
-// Configuração rígida de CORS
-const io = require('socket.io')(http, {
-    cors: {
-        origin: "*", // Vamos testar com asterisco primeiro para descartar o erro de CORS
-        methods: ["GET", "POST"]
-    }
-});
-
-// Garante que o servidor sirva os arquivos da pasta raiz
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(__dirname)); // Serve todos os arquivos .html, .js, .mp3
 
 io.on('connection', (socket) => {
-    console.log('Cliente conectado: ' + socket.id);
     socket.on('comando', (cmd) => {
-        io.emit('comando', cmd);
+        io.emit('comando', cmd); // Repassa o comando para todos
     });
 });
 
 const PORT = process.env.PORT || 3000;
-http.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+http.listen(PORT, () => console.log(`Rodando na porta ${PORT}`));

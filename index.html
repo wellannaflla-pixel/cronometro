@@ -35,7 +35,7 @@
     }
     document.body.addEventListener('click', autorizarAudio);
     
-    const socket = io("https://cronometro-1.onrender.com");
+    const socket = io();
 
     socket.on('comando', (cmd) => {
         if (cmd === 'iniciar' && !rodando) {
