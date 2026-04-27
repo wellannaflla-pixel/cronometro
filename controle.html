@@ -12,12 +12,10 @@
     <button onclick="enviar('resetar')">RESETAR</button>
 
     <script>
-        const socket = io();
+    
         
-        function enviar(cmd) { 
-            console.log("Enviando: " + cmd);
-            socket.emit('comando', cmd); 
-        }
+        const socket = io("https://sua-url-aqui.onrender.com");
+        
         
         socket.on('connect', () => {
             console.log("Conectado ao servidor!");

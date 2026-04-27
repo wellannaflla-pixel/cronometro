@@ -26,19 +26,8 @@
         }
     }
     document.body.addEventListener('click', autorizarAudio);
-    const socket = io();
-    let tempo = 5; // 10 minutos
-    let acrescimoUsado = false;
-    let rodando = false;
-    let timer;
-
-    const display = document.getElementById('display');
-
-    function atualizarDisplay() {
-        let m = Math.floor(tempo / 60);
-        let s = tempo % 60;
-        display.innerText = `${m}:${s < 10 ? '0'+s : s}`;
-    }
+    
+    const socket = io("https://sua-url-aqui.onrender.com");
 
     socket.on('comando', (cmd) => {
         if (cmd === 'iniciar' && !rodando) {
@@ -74,7 +63,7 @@ if (tempo > 0) {
         }
 
         if (cmd === 'resetar') {
-            tempo = 600;
+            tempo = 5;
             acrescimoUsado = false;
             atualizarDisplay();
             clearInterval(timer);
