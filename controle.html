@@ -1,9 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle Placar</title>
+    <style>
+        body { 
+            display: flex; flex-direction: column; align-items: center; 
+            justify-content: center; height: 100vh; background: #2c3e50; 
+            font-family: sans-serif; margin: 0; 
+        }
+        
+        button {
+            width: 80%; padding: 30px; margin: 15px; font-size: 24px;
+            font-weight: bold; color: white; border: none; border-radius: 15px;
+            cursor: pointer; transition: all 0.1s;
+            /* Efeito 3D inicial */
+            box-shadow: 0 8px #1a252f;
+        }
+
+        /* Cores iniciais */
+        .btn-iniciar { background-color: #27ae60; }
+        .btn-mais { background-color: #2980b9; }
+        .btn-reset { background-color: #c0392b; }
+
+        /* Quando pressionado (Efeito de clique) */
+        button:active {
+            transform: translateY(6px); /* Desce o botão */
+            box-shadow: 0 2px #1a252f; /* Diminui a sombra */
+            filter: brightness(0.8); /* Muda a cor ficando mais escura */
+        }
+    </style>
+</head>
 <body>
-    <button onclick="enviar('iniciar')">INICIAR</button>
-    <button onclick="enviar('acrescentar3')">+3 MIN</button>
-    <button onclick="enviar('resetar')">RESETAR</button>
+
+    <button class="btn-iniciar" onclick="enviar('iniciar')">INICIAR</button>
+    <button class="btn-mais" onclick="enviar('acrescentar3')">+3 MIN</button>
+    <button class="btn-reset" onclick="enviar('resetar')">RESETAR</button>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
