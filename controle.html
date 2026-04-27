@@ -1,25 +1,16 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Controle do Placar</title>
-    <script src="/socket.io/socket.io.js"></script>
-</head>
+<html>
 <body>
-    <h1>Controle</h1>
-    <button onclick="enviar('iniciar')">INICIAR JOGO</button>
-    <button onclick="enviar('acrescentar3')">+3 MINUTOS</button>
+    <button onclick="enviar('iniciar')">INICIAR</button>
+    <button onclick="enviar('acrescentar3')">+3 MIN</button>
     <button onclick="enviar('resetar')">RESETAR</button>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script>
-    
-        
         const socket = io();
-        
-        
-        socket.on('connect', () => {
-            console.log("Conectado ao servidor!");
-        });
+        function enviar(cmd) {
+            socket.emit('comando', cmd);
+        }
     </script>
 </body>
 </html>

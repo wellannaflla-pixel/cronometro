@@ -1,84 +1,70 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
+    <meta charset="UTF-8">
     <title>Placar Futsal</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        body { background: black; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; font-size: 30vh; font-family: sans-serif; }
+        body { background: black; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; font-size: 30vh; font-family: sans-serif; margin: 0; transition: background-color 0.5s; }
     </style>
 </head>
 <body>
-    <div id="display">00:05</div>
+    <div id="display">10:00</div>
+    <audio id="somSirene" src="sirene.mp3"></audio>
+
     <script>
-        
-    const sirene = document.getElementById('somSirene');
-    let somAutorizado = false;
+        document.addEventListener('DOMContentLoaded', () => {
+            const socket = io();
+            const sirene = document.getElementById('somSirene');
+            const display = document.getElementById('display');
+            let tempo = 600;
+            let rodando = false;
+            let timer;
+            let somAutorizado = false;
 
-    function autorizarAudio() {
-    
-        const sirene = document.getElementById('somSirene');
-        if (!sirene) {
-            console.error("Elemento de áudio não encontrado!");
-            return;
-        }
-    }
-    function autorizarAudio() {
-        if (!somAutorizado) {
-            sirene.play().then(() => {
-                sirene.pause();
-                sirene.currentTime = 0;
-                somAutorizado = true;
-                console.log("Áudio autorizado com sucesso!");
-                document.body.removeEventListener('click', autorizarAudio);
-            }).catch(e => console.log("Ainda bloqueado:", e));
-        }
-    }
-    document.body.addEventListener('click', autorizarAudio);
-    
-    const socket = io();
-
-    socket.on('comando', (cmd) => {
-        if (cmd === 'iniciar' && !rodando) {
-            rodando = true;
-            timer = setInterval(() => {
-                if (tempo > 0) {
-                    tempo--;
-                    atualizarDisplay();
-                
-if (tempo > 0) {
-    tempo--;
-    atualizarDisplay();
-} else {
-    clearInterval(timer);
-    rodando = false;
-    
-    // Tocar a sirene
-    document.getElementById('somSirene').play();
-    
-    // Efeito visual de alerta
-    document.body.style.backgroundColor = "red";
-    setTimeout(() => { document.body.style.backgroundColor = "black"; }, 3000);
-    
-}
+            function autorizarAudio() {
+                if (!somAutorizado && sirene) {
+                    sirene.play().then(() => {
+                        sirene.pause();
+                        sirene.currentTime = 0;
+                        somAutorizado = true;
+                        document.body.removeEventListener('click', autorizarAudio);
+                    }).catch(e => console.log("Aguardando interação...", e));
                 }
-            }, 1000);
-        }
-        
-        if (cmd === 'acrescentar3' && !acrescimoUsado) {
-            tempo += 180; // Adiciona 3 minutos
-            acrescimoUsado = true; // Bloqueia para não usar de novo
-            atualizarDisplay();
-        }
+            }
+            document.body.addEventListener('click', autorizarAudio);
 
-        if (cmd === 'resetar') {
-            tempo = 5;
-            acrescimoUsado = false;
-            atualizarDisplay();
-            clearInterval(timer);
-            rodando = false;
-        }
-    });
-</script>
+            function atualizarDisplay() {
+                let m = Math.floor(tempo / 60);
+                let s = tempo % 60;
+                display.innerText = `${m}:${s < 10 ? '0'+s : s}`;
+            }
+
+            socket.on('comando', (cmd) => {
+                if (cmd === 'iniciar' && !rodando) {
+                    rodando = true;
+                    timer = setInterval(() => {
+                        if (tempo > 0) {
+                            tempo--;
+                            atualizarDisplay();
+                        } else {
+                            clearInterval(timer);
+                            rodando = false;
+                            if (sirene) sirene.play();
+                            document.body.style.backgroundColor = "red";
+                            setTimeout(() => { document.body.style.backgroundColor = "black"; }, 3000);
+                        }
+                    }, 1000);
+                }
+                if (cmd === 'resetar' || cmd === 'acrescentar3') {
+                    if (sirene) { sirene.pause(); sirene.currentTime = 0; }
+                    if (cmd === 'resetar') { tempo = 600; clearInterval(timer); rodando = false; }
+                    if (cmd === 'acrescentar3') { tempo += 180; }
+                    atualizarDisplay();
+                    document.body.style.backgroundColor = "black";
+                }
+            });
+        });
+    </script>
 </body>
-<audio id="somSirene" src="sirene.mp3"></audio>
 </html>
