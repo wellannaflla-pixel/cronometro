@@ -15,6 +15,14 @@
     let somAutorizado = false;
 
     function autorizarAudio() {
+    
+        const sirene = document.getElementById('somSirene');
+        if (!sirene) {
+            console.error("Elemento de áudio não encontrado!");
+            return;
+        }
+
+    function autorizarAudio() {
         if (!somAutorizado) {
             sirene.play().then(() => {
                 sirene.pause();
