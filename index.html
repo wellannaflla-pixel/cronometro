@@ -8,8 +8,24 @@
     </style>
 </head>
 <body>
-    <div id="display">10:00</div>
+    <div id="display">00:05</div>
     <script>
+        // 1. COLOQUE O CÓDIGO DE AUTORIZAÇÃO AQUI EM CIMA
+    const sirene = document.getElementById('somSirene');
+    let somAutorizado = false;
+
+    function autorizarAudio() {
+        if (!somAutorizado) {
+            sirene.play().then(() => {
+                sirene.pause();
+                sirene.currentTime = 0;
+                somAutorizado = true;
+                console.log("Áudio autorizado com sucesso!");
+                document.body.removeEventListener('click', autorizarAudio);
+            }).catch(e => console.log("Ainda bloqueado:", e));
+        }
+    }
+    document.body.addEventListener('click', autorizarAudio);0000000000000000000000000000000000000000000000
     const socket = io();
     let tempo = 5; // 10 minutos
     let acrescimoUsado = false;
@@ -31,11 +47,7 @@
                 if (tempo > 0) {
                     tempo--;
                     atualizarDisplay();
-                } else {
-                    clearInterval(timer);
-                    rodando = false;
-                    alert("TEMPO ENCERRADO!"); // Sirene aqui depois
-                    // ... dentro do setInterval
+                
 if (tempo > 0) {
     tempo--;
     atualizarDisplay();
@@ -50,7 +62,6 @@ if (tempo > 0) {
     document.body.style.backgroundColor = "red";
     setTimeout(() => { document.body.style.backgroundColor = "black"; }, 3000);
     
-    alert("FIM DE JOGO!");
 }
                 }
             }, 1000);
