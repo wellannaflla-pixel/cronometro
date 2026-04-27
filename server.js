@@ -1,21 +1,23 @@
 const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
+const path = require('path');
+
+// Configuração rígida de CORS
 const io = require('socket.io')(http, {
     cors: {
-        origin: "https://cronometro-1.onrender.com", // Verifique se está igualzinho ao seu site
+        origin: "*", // Vamos testar com asterisco primeiro para descartar o erro de CORS
         methods: ["GET", "POST"]
     }
 });
 
-app.use(express.static(__dirname));
+// Garante que o servidor sirva os arquivos da pasta raiz
+app.use(express.static(path.join(__dirname)));
 
 io.on('connection', (socket) => {
-    console.log('--- Um dispositivo conectou ao servidor! ---'); // Se isso não aparecer, o navegador nem chega a conectar
-
+    console.log('Cliente conectado: ' + socket.id);
     socket.on('comando', (cmd) => {
-        console.log('Comando recebido pelo servidor: ' + cmd);
-        io.emit('comando', cmd); 
+        io.emit('comando', cmd);
     });
 });
 
