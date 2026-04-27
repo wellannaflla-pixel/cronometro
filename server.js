@@ -3,9 +3,8 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
     cors: {
-        origin: "https://cronometro-1.onrender.com", // Coloque o endereço REAL do seu cronômetro
-        methods: ["GET", "POST"],
-        credentials: true
+        origin: "https://cronometro-1.onrender.com", // Verifique se está igualzinho ao seu site
+        methods: ["GET", "POST"]
     }
 });
 

@@ -10,7 +10,7 @@
 <body>
     <div id="display">00:05</div>
     <script>
-        // 1. COLOQUE O CÓDIGO DE AUTORIZAÇÃO AQUI EM CIMA
+        
     const sirene = document.getElementById('somSirene');
     let somAutorizado = false;
 
@@ -21,7 +21,7 @@
             console.error("Elemento de áudio não encontrado!");
             return;
         }
-
+    }
     function autorizarAudio() {
         if (!somAutorizado) {
             sirene.play().then(() => {
@@ -35,7 +35,7 @@
     }
     document.body.addEventListener('click', autorizarAudio);
     
-    const socket = io("https://https://cronometro-1.onrender.com");
+    const socket = io("https://cronometro-1.onrender.com");
 
     socket.on('comando', (cmd) => {
         if (cmd === 'iniciar' && !rodando) {
