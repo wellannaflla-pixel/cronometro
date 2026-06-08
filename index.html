@@ -82,6 +82,10 @@
             socket.on('comando', (cmd) => {
                 if (cmd === 'iniciar' && !rodando) {
                     rodando = true;
+
+                    // NOVA LINHA: Toca a sirene imediatamente ao iniciar o cronômetro
+                    if (sirene) { sirene.play().catch(e => console.log(e)); }
+
                     timer = setInterval(() => {
                         if (tempo > 0) {
                             tempo--;
