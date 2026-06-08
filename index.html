@@ -61,6 +61,13 @@
                         if (!document.fullscreenElement) {
                             document.documentElement.requestFullscreen().catch(err => console.log(err));
                         }
+
+                        // NOVA LINHA: Mantém a tela ligada impedindo o bloqueio por inatividade
+                        if ('wakeLock' in navigator) {
+                            navigator.wakeLock.request('screen')
+                                .then(() => console.log("Tela trancada: Não vai apagar!"))
+                                .catch(err => console.log("Erro ao manter tela ativa:", err));
+                        }
                     }).catch(e => console.log("Aguardando interação:", e));
                 }
             }
