@@ -53,8 +53,8 @@
             function autorizarAudio() {
                 if (!somAutorizado && sirene) {
                     sirene.play().then(() => {
-                        Apito.pause();
-                        Apito.currentTime = 0;
+                        sirene.pause(); // CORRIGIDO AQUI
+                        sirene.currentTime = 0; // CORRIGIDO AQUI
                         somAutorizado = true;
                         document.body.removeEventListener('click', autorizarAudio);
 
@@ -62,7 +62,7 @@
                             document.documentElement.requestFullscreen().catch(err => console.log(err));
                         }
 
-                        // NOVA LINHA: Mantém a tela ligada impedindo o bloqueio por inatividade
+                        // Mantém a tela ligada impedindo o bloqueio por inatividade
                         if ('wakeLock' in navigator) {
                             navigator.wakeLock.request('screen')
                                 .then(() => console.log("Tela trancada: Não vai apagar!"))
@@ -83,8 +83,8 @@
                 if (cmd === 'iniciar' && !rodando) {
                     rodando = true;
 
-                    // NOVA LINHA: Toca o Apito imediatamente ao iniciar o cronômetro
-                    if (Apito) { Apito.play().catch(e => console.log(e)); }
+                    // Toca o som imediatamente ao iniciar o cronômetro
+                    if (sirene) { sirene.play().catch(e => console.log(e)); } // CORRIGIDO AQUI
 
                     timer = setInterval(() => {
                         if (tempo > 0) {
@@ -94,8 +94,8 @@
                             clearInterval(timer);
                             rodando = false;
                             
-                            // Toca o Apito
-                            if (Apito) Apito.play();
+                            // Toca o som quando o tempo acaba
+                            if (sirene) sirene.play(); // CORRIGIDO AQUI
                             
                             // Ativa a classe que faz piscar
                             document.body.classList.add('piscar-vermelho');
@@ -110,8 +110,8 @@
                 }
                 
                 if (cmd === 'resetar' || cmd === 'acrescentar3') {
-                    if (Apito) { Apito.pause(); sirene.currentTime = 0; }
-                    document.body.classList.remove('piscar-vermelho'); // Para de piscar se resetar
+                    if (sirene) { sirene.pause(); sirene.currentTime = 0; } // CORRIGIDO AQUI
+                    document.body.classList.remove('piscar-vermelho');
                     if (cmd === 'resetar') { tempo = 600; clearInterval(timer); rodando = false; }
                     if (cmd === 'acrescentar3') { tempo += 180; }
                     atualizarDisplay();
