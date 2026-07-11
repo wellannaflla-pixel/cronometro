@@ -50,11 +50,12 @@
             let timer;
             let somAutorizado = false;
 
+            // Função para liberar o som no navegador
             function autorizarAudio() {
                 if (!somAutorizado && sirene) {
                     sirene.play().then(() => {
-                        sirene.pause(); // CORRIGIDO AQUI
-                        sirene.currentTime = 0; // CORRIGIDO AQUI
+                        sirene.pause();
+                        sirene.currentTime = 0;
                         somAutorizado = true;
                         document.body.removeEventListener('click', autorizarAudio);
 
@@ -62,7 +63,6 @@
                             document.documentElement.requestFullscreen().catch(err => console.log(err));
                         }
 
-                        // Mantém a tela ligada impedindo o bloqueio por inatividade
                         if ('wakeLock' in navigator) {
                             navigator.wakeLock.request('screen')
                                 .then(() => console.log("Tela trancada: Não vai apagar!"))
@@ -79,11 +79,14 @@
                 display.innerText = `${m}:${s < 10 ? '0'+s : s}`;
             }
 
+            // Recebe os comandos do controle
             socket.on('comando', (cmd) => {
+                
+                // INICIAR
                 if (cmd === 'iniciar' && !rodando) {
                     rodando = true;
 
-                    if (sirene) { sirene.play().catch(e => console.log(e)); } 
+                    if (sirene) { sirene.play().catch(e => console.log(e)); }
 
                     timer = setInterval(() => {
                         if (tempo > 0) {
@@ -93,7 +96,7 @@
                             clearInterval(timer);
                             rodando = false;
                             
-                            if (sirene) sirene.play(); 
+                            if (sirene) { sirene.play().catch(e => console.log(e)); }
                             
                             document.body.classList.add('piscar-vermelho');
                             
@@ -105,26 +108,32 @@
                     }, 1000);
                 }
 
-                // NOVO: Regra para pausar o cronômetro
+                // PAUSAR
                 if (cmd === 'pausar' && rodando) {
-                    clearInterval(timer); // Para a contagem
-                    rodando = false;      // Libera para poder clicar em "Iniciar" novamente depois
+                    clearInterval(timer);
+                    rodando = false;
                 }
                 
-                // MUDANÇA: 'acrescentar3' virou 'acrescentar1'
+                // RESETAR ou ACRESCENTAR 1 MIN
                 if (cmd === 'resetar' || cmd === 'acrescentar1') {
-                    if (sirene) { sirene.pause(); sirene.currentTime = 0; } 
+                    if (sirene) { sirene.pause(); sirene.currentTime = 0; }
                     document.body.classList.remove('piscar-vermelho');
                     
-                    if (cmd === 'resetar') { tempo = 600; clearInterval(timer); rodando = false; }
+                    if (cmd === 'resetar') { 
+                        tempo = 600; 
+                        clearInterval(timer); 
+                        rodando = false; 
+                    }
                     
-                    // Somar 60 segundos em vez de 180
-                    if (cmd === 'acrescentar1') { tempo += 60; } 
+                    if (cmd === 'acrescentar1') { 
+                        tempo += 60; 
+                    }
                     
                     atualizarDisplay();
                     document.body.style.backgroundColor = "black";
                 }
             });
+        });
     </script>
 </body>
 </html>
