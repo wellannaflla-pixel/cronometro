@@ -12,37 +12,54 @@
         }
         
         button {
-            width: 80%; padding: 30px; margin: 15px; font-size: 24px;
+            width: 80%; padding: 25px; margin: 10px; font-size: 24px;
             font-weight: bold; color: white; border: none; border-radius: 15px;
             cursor: pointer; transition: all 0.1s;
             /* Efeito 3D inicial */
             box-shadow: 0 8px #1a252f;
         }
 
-        /* Cores iniciais */
-        .btn-iniciar { background-color: #27ae60; }
-        .btn-mais { background-color: #2980b9; }
-        .btn-reset { background-color: #c0392b; }
+        /* Cores dos botões */
+        .btn-iniciar { background-color: #27ae60; } /* Verde */
+        .btn-pausar { background-color: #f39c12; }  /* Laranja */
+        .btn-mais { background-color: #2980b9; }    /* Azul */
+        .btn-reset { background-color: #c0392b; }   /* Vermelho */
 
         /* Quando pressionado (Efeito de clique) */
         button:active {
-            transform: translateY(6px); /* Desce o botão */
-            box-shadow: 0 2px #1a252f; /* Diminui a sombra */
-            filter: brightness(0.8); /* Muda a cor ficando mais escura */
+            transform: translateY(6px);
+            box-shadow: 0 2px #1a252f;
+            filter: brightness(0.8);
         }
     </style>
 </head>
 <body>
 
     <button class="btn-iniciar" onclick="enviar('iniciar')">INICIAR</button>
-    <button class="btn-mais" onclick="enviar('acrescentar3')">+3 MIN</button>
+    <button class="btn-pausar" onclick="enviar('pausar')">PAUSAR</button>
+    <button class="btn-mais" onclick="enviar('acrescentar1')">+1 MIN</button>
     <button class="btn-reset" onclick="enviar('resetar')">RESETAR</button>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
+        
         function enviar(cmd) {
-            socket.emit('comando', cmd);
+            let mensagem = "";
+            
+            if (cmd === 'iniciar') {
+                mensagem = "Deseja iniciar o cronômetro?";
+            } else if (cmd === 'pausar') {
+                mensagem = "Deseja pausar o tempo?";
+            } else if (cmd === 'acrescentar1') {
+                mensagem = "Deseja adicionar +1 minuto ao tempo atual?";
+            } else if (cmd === 'resetar') {
+                mensagem = "TEM CERTEZA? Isso vai zerar o cronômetro para 10:00!";
+            }
+
+            if (confirm(mensagem)) {
+                socket.emit('comando', cmd);
+            }
         }
     </script>
 </body>

@@ -83,8 +83,7 @@
                 if (cmd === 'iniciar' && !rodando) {
                     rodando = true;
 
-                    // Toca o som imediatamente ao iniciar o cronômetro
-                    if (sirene) { sirene.play().catch(e => console.log(e)); } // CORRIGIDO AQUI
+                    if (sirene) { sirene.play().catch(e => console.log(e)); } 
 
                     timer = setInterval(() => {
                         if (tempo > 0) {
@@ -94,13 +93,10 @@
                             clearInterval(timer);
                             rodando = false;
                             
-                            // Toca o som quando o tempo acaba
-                            if (sirene) sirene.play(); // CORRIGIDO AQUI
+                            if (sirene) sirene.play(); 
                             
-                            // Ativa a classe que faz piscar
                             document.body.classList.add('piscar-vermelho');
                             
-                            // Para de piscar após 5 segundos
                             setTimeout(() => { 
                                 document.body.classList.remove('piscar-vermelho');
                                 document.body.style.backgroundColor = "black";
@@ -108,17 +104,27 @@
                         }
                     }, 1000);
                 }
+
+                // NOVO: Regra para pausar o cronômetro
+                if (cmd === 'pausar' && rodando) {
+                    clearInterval(timer); // Para a contagem
+                    rodando = false;      // Libera para poder clicar em "Iniciar" novamente depois
+                }
                 
-                if (cmd === 'resetar' || cmd === 'acrescentar3') {
-                    if (sirene) { sirene.pause(); sirene.currentTime = 0; } // CORRIGIDO AQUI
+                // MUDANÇA: 'acrescentar3' virou 'acrescentar1'
+                if (cmd === 'resetar' || cmd === 'acrescentar1') {
+                    if (sirene) { sirene.pause(); sirene.currentTime = 0; } 
                     document.body.classList.remove('piscar-vermelho');
+                    
                     if (cmd === 'resetar') { tempo = 600; clearInterval(timer); rodando = false; }
-                    if (cmd === 'acrescentar3') { tempo += 180; }
+                    
+                    // Somar 60 segundos em vez de 180
+                    if (cmd === 'acrescentar1') { tempo += 60; } 
+                    
                     atualizarDisplay();
                     document.body.style.backgroundColor = "black";
                 }
             });
-        });
     </script>
 </body>
 </html>
