@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Placar Futsal - Gigante</title>
+    <title>Placar Futsal - Gigante e Brilhante</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
         * {
@@ -22,17 +22,18 @@
             transition: background-color 0.2s; 
         }
 
+        /* Animação de piscar com fundo vermelho */
         @keyframes piscar {
-            0% { background-color: red; }
-            50% { background-color: black; }
-            100% { background-color: red; }
+            0% { background-color: #ff0000; }
+            50% { background-color: #000000; }
+            100% { background-color: #ff0000; }
         }
 
         .piscar-vermelho {
             animation: piscar 0.5s infinite;
         }
 
-        /* Container que ocupa todo o espaço restante */
+        /* Container central do placar */
         #display-container { 
             flex: 1; 
             display: flex; 
@@ -42,7 +43,7 @@
             overflow: hidden;
         }
 
-        /* Números em tamanho gigante para visualização distante */
+        /* Números gigantes com efeito neon ultra brilhante */
         #display { 
             font-size: 70vh; 
             font-family: 'Arial Black', Impact, sans-serif; 
@@ -51,15 +52,25 @@
             letter-spacing: -8px; 
             user-select: none;
             text-align: center;
+            color: #ffffff;
+            /* Camadas de sombra intensa simulando iluminação forte */
+            text-shadow: 
+                0 0 10px #ffffff,
+                0 0 20px #ffffff,
+                0 0 40px #ffff00,
+                0 0 80px #ffff00,
+                0 0 120px #ffcc00,
+                0 0 160px #ffcc00;
         }
 
-        /* Rodapé de botões compacto */
+        /* Rodapé de controles */
         #controles { 
             display: flex; 
             gap: 10px; 
             padding: 10px 15px; 
             background: #111; 
             width: 100%;
+            z-index: 10;
         }
 
         button { 
@@ -122,10 +133,17 @@
                 rodando = true;
                 if (sirene) sirene.play().catch(e => console.log(e));
                 
-                // Entra em Tela Cheia ao clicar em Iniciar
+                // Ativa Tela Cheia
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen().catch(err => console.log(err));
                 }
+
+                // Pisca a tela em vermelho por 10 segundos no início
+                document.body.classList.add('piscar-vermelho');
+                setTimeout(() => {
+                    document.body.classList.remove('piscar-vermelho');
+                    document.body.style.backgroundColor = "black";
+                }, 10000);
 
                 timer = setInterval(() => {
                     if (tempo > 0) {
@@ -134,12 +152,15 @@
                     } else {
                         clearInterval(timer);
                         rodando = false;
+
                         if (sirene) sirene.play().catch(e => console.log(e));
+
+                        // Pisca a tela em vermelho por 10 segundos quando o cronômetro ZERA
                         document.body.classList.add('piscar-vermelho');
                         setTimeout(() => { 
                             document.body.classList.remove('piscar-vermelho');
                             document.body.style.backgroundColor = "black";
-                        }, 5000);
+                        }, 10000);
                     }
                 }, 1000);
             }
@@ -170,12 +191,12 @@
             }
         }
 
-        // Emite o comando via Socket
+        // Envia o comando via Socket
         function enviar(cmd) {
             socket.emit('comando', cmd);
         }
 
-        // Recebe a instrução do servidor (evita disparo duplo local)
+        // Recebe o comando via Socket
         socket.on('comando', (cmd) => {
             executarComando(cmd);
         });
