@@ -2,102 +2,29 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Placar e Controle Futsal</title>
+    <title>Placar Futsal</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        body { background: black; color: white; display: flex; flex-direction: column; height: 100vh; margin: 0; font-family: sans-serif; transition: background-color 0.2s; }
+        @keyframes piscar { 0% { background-color: red; } 50% { background-color: black; } 100% { background-color: red; } }
+        .piscar-vermelho { animation: piscar 0.5s infinite; }
 
-        body { 
-            background: black; 
-            color: white; 
-            display: flex; 
-            flex-direction: column;
-            justify-content: space-between; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-            padding: 20px;
-            overflow: hidden; 
-            transition: background-color 0.2s; 
-            font-family: sans-serif;
-        }
+        #display-container { flex: 1; display: flex; align-items: center; justify-content: center; }
+        #display { font-size: 28vw; font-family: 'Courier New', monospace; font-weight: bold; }
 
-        /* Animação de piscar */
-        @keyframes piscar {
-            0% { background-color: red; }
-            50% { background-color: black; }
-            100% { background-color: red; }
-        }
-
-        .piscar-vermelho {
-            animation: piscar 0.5s infinite;
-        }
-
-        /* Área do Display */
-        #display-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-        }
-
-        #display { 
-            font-size: 28vw; 
-            font-family: 'Courier New', monospace; 
-            font-weight: bold;
-            line-height: 1;
-            user-select: none;
-        }
-
-        /* Área dos Botões de Controle */
-        #controles {
-            display: flex;
-            gap: 15px;
-            width: 100%;
-            max-width: 900px;
-            justify-content: center;
-            padding-bottom: 10px;
-        }
-
-        button {
-            flex: 1;
-            padding: 20px 10px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.1s;
-            box-shadow: 0 6px #1a252f;
-        }
-
-        .btn-iniciar { background-color: #27ae60; } /* Verde */
-        .btn-pausar { background-color: #f39c12; }  /* Laranja */
-        .btn-mais { background-color: #2980b9; }    /* Azul */
-        .btn-reset { background-color: #c0392b; }   /* Vermelho */
-
-        button:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px #1a252f;
-            filter: brightness(0.8);
-        }
+        #controles { display: flex; gap: 15px; padding: 20px; justify-content: center; }
+        button { flex: 1; padding: 20px; font-size: 1.5rem; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 6px #1a252f; }
+        .btn-iniciar { background-color: #27ae60; color: white; }
+        .btn-pausar { background-color: #f39c12; color: white; }
+        .btn-mais { background-color: #2980b9; color: white; }
+        .btn-reset { background-color: #c0392b; color: white; }
     </style>
 </head>
 <body>
 
-    <!-- PAINEL DO PLACAR -->
-    <div id="display-container">
-        <div id="display">10:00</div>
-    </div>
-    
+    <div id="display-container"><div id="display">10:00</div></div>
     <audio id="somSirene" src="Apito.mp3"></audio>
 
-    <!-- PAINEL DE CONTROLE -->
     <div id="controles">
         <button class="btn-iniciar" onclick="enviar('iniciar')">INICIAR</button>
         <button class="btn-pausar" onclick="enviar('pausar')">PAUSAR</button>
@@ -106,37 +33,12 @@
     </div>
 
     <script>
-        let socket;
-        try {
-            socket = io();
-        } catch(e) {
-            console.log("Socket.io não carregado ou rodando local sem servidor.");
-        }
-
+        const socket = io();
         const sirene = document.getElementById('somSirene');
         const display = document.getElementById('display');
-        let tempo = 600; // 10 minutos em segundos
+        let tempo = 600; 
         let rodando = false;
         let timer;
-        let somAutorizado = false;
-
-        // Liberar áudio e Fullscreen no primeiro clique em qualquer lugar
-        function autorizarAudio() {
-            if (!somAutorizado && sirene) {
-                sirene.play().then(() => {
-                    sirene.pause();
-                    sirene.currentTime = 0;
-                    somAutorizado = true;
-
-                    if ('wakeLock' in navigator) {
-                        navigator.wakeLock.request('screen')
-                            .then(() => console.log("Tela trancada: Não vai apagar!"))
-                            .catch(err => console.log("Erro ao manter tela ativa:", err));
-                    }
-                }).catch(e => console.log("Aguardando interação:", e));
-            }
-        }
-        document.body.addEventListener('click', autorizarAudio, { once: true });
 
         function atualizarDisplay() {
             let m = Math.floor(tempo / 60);
@@ -144,13 +46,16 @@
             display.innerText = `${m}:${s < 10 ? '0'+s : s}`;
         }
 
-        // Executa a lógica de cada comando
         function executarComando(cmd) {
-            // INICIAR
+            // Lógica do INICIAR
             if (cmd === 'iniciar' && !rodando) {
                 rodando = true;
-
-                if (sirene) { sirene.play().catch(e => console.log(e)); }
+                if (sirene) sirene.play().catch(e => console.log(e));
+                
+                // Tenta entrar em Fullscreen ao iniciar
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => console.log(err));
+                }
 
                 timer = setInterval(() => {
                     if (tempo > 0) {
@@ -159,62 +64,41 @@
                     } else {
                         clearInterval(timer);
                         rodando = false;
-
-                        if (sirene) { sirene.play().catch(e => console.log(e)); }
-
+                        if (sirene) sirene.play().catch(e => console.log(e));
                         document.body.classList.add('piscar-vermelho');
-
-                        setTimeout(() => { 
-                            document.body.classList.remove('piscar-vermelho');
-                            document.body.style.backgroundColor = "black";
-                        }, 5000);
+                        setTimeout(() => { document.body.classList.remove('piscar-vermelho'); }, 5000);
                     }
                 }, 1000);
             }
 
-            // PAUSAR
+            // Lógica do PAUSAR
             if (cmd === 'pausar' && rodando) {
                 clearInterval(timer);
                 rodando = false;
             }
 
-            // RESETAR ou ACRESCENTAR 1 MIN
+            // Lógica do RESETAR / +1 MIN
             if (cmd === 'resetar' || cmd === 'acrescentar1') {
                 if (sirene) { sirene.pause(); sirene.currentTime = 0; }
                 document.body.classList.remove('piscar-vermelho');
 
-                if (cmd === 'resetar') { 
-                    tempo = 600; 
-                    clearInterval(timer); 
-                    rodando = false; 
-                }
-
-                if (cmd === 'acrescentar1') { 
-                    tempo += 60; 
-                }
-
+                if (cmd === 'resetar') { tempo = 600; clearInterval(timer); rodando = false; }
+                if (cmd === 'acrescentar1') { tempo += 60; }
+                
                 atualizarDisplay();
-                document.body.style.backgroundColor = "black";
             }
         }
 
-        // Envia o comando
+        // Nova estratégia: Apenas o Socket dispara a ação. 
+        // Quem clica apenas "avisa" ao servidor que quer executar.
         function enviar(cmd) {
-            // Executa localmente de imediato
+            socket.emit('comando', cmd);
+        }
+
+        // O comando só é executado quando chega via socket
+        socket.on('comando', (cmd) => {
             executarComando(cmd);
-
-            // Emite para o servidor Socket se estiver conectado
-            if (socket) {
-                socket.emit('comando', cmd);
-            }
-        }
-
-        // Recebe comandos (se houver outro controle externo conectado)
-        if (socket) {
-            socket.on('comando', (cmd) => {
-                executarComando(cmd);
-            });
-        }
+        });
     </script>
 </body>
 </html>
