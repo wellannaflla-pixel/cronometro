@@ -2,27 +2,97 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Placar Futsal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placar Futsal - Gigante</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        body { background: black; color: white; display: flex; flex-direction: column; height: 100vh; margin: 0; font-family: sans-serif; transition: background-color 0.2s; }
-        @keyframes piscar { 0% { background-color: red; } 50% { background-color: black; } 100% { background-color: red; } }
-        .piscar-vermelho { animation: piscar 0.5s infinite; }
+        * {
+            box-sizing: border-box;
+        }
 
-        #display-container { flex: 1; display: flex; align-items: center; justify-content: center; }
-        #display { font-size: 28vw; font-family: 'Courier New', monospace; font-weight: bold; }
+        body { 
+            background: black; 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            margin: 0; 
+            overflow: hidden; 
+            font-family: sans-serif;
+            transition: background-color 0.2s; 
+        }
 
-        #controles { display: flex; gap: 15px; padding: 20px; justify-content: center; }
-        button { flex: 1; padding: 20px; font-size: 1.5rem; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 6px #1a252f; }
-        .btn-iniciar { background-color: #27ae60; color: white; }
-        .btn-pausar { background-color: #f39c12; color: white; }
-        .btn-mais { background-color: #2980b9; color: white; }
-        .btn-reset { background-color: #c0392b; color: white; }
+        @keyframes piscar {
+            0% { background-color: red; }
+            50% { background-color: black; }
+            100% { background-color: red; }
+        }
+
+        .piscar-vermelho {
+            animation: piscar 0.5s infinite;
+        }
+
+        /* Container que ocupa todo o espaço restante */
+        #display-container { 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* Números em tamanho gigante para visualização distante */
+        #display { 
+            font-size: 70vh; 
+            font-family: 'Arial Black', Impact, sans-serif; 
+            font-weight: 900; 
+            line-height: 0.85; 
+            letter-spacing: -8px; 
+            user-select: none;
+            text-align: center;
+        }
+
+        /* Rodapé de botões compacto */
+        #controles { 
+            display: flex; 
+            gap: 10px; 
+            padding: 10px 15px; 
+            background: #111; 
+            width: 100%;
+        }
+
+        button { 
+            flex: 1; 
+            padding: 15px; 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: all 0.1s;
+            box-shadow: 0 4px #000;
+        }
+
+        .btn-iniciar { background-color: #27ae60; }
+        .btn-pausar { background-color: #f39c12; }
+        .btn-mais { background-color: #2980b9; }
+        .btn-reset { background-color: #c0392b; }
+
+        button:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px #000;
+            filter: brightness(0.8);
+        }
     </style>
 </head>
 <body>
 
-    <div id="display-container"><div id="display">10:00</div></div>
+    <div id="display-container">
+        <div id="display">10:00</div>
+    </div>
+    
     <audio id="somSirene" src="Apito.mp3"></audio>
 
     <div id="controles">
@@ -47,12 +117,12 @@
         }
 
         function executarComando(cmd) {
-            // Lógica do INICIAR
+            // INICIAR
             if (cmd === 'iniciar' && !rodando) {
                 rodando = true;
                 if (sirene) sirene.play().catch(e => console.log(e));
                 
-                // Tenta entrar em Fullscreen ao iniciar
+                // Entra em Tela Cheia ao clicar em Iniciar
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen().catch(err => console.log(err));
                 }
@@ -66,36 +136,46 @@
                         rodando = false;
                         if (sirene) sirene.play().catch(e => console.log(e));
                         document.body.classList.add('piscar-vermelho');
-                        setTimeout(() => { document.body.classList.remove('piscar-vermelho'); }, 5000);
+                        setTimeout(() => { 
+                            document.body.classList.remove('piscar-vermelho');
+                            document.body.style.backgroundColor = "black";
+                        }, 5000);
                     }
                 }, 1000);
             }
 
-            // Lógica do PAUSAR
+            // PAUSAR
             if (cmd === 'pausar' && rodando) {
                 clearInterval(timer);
                 rodando = false;
             }
 
-            // Lógica do RESETAR / +1 MIN
+            // RESETAR ou ACRESCENTAR 1 MIN
             if (cmd === 'resetar' || cmd === 'acrescentar1') {
                 if (sirene) { sirene.pause(); sirene.currentTime = 0; }
                 document.body.classList.remove('piscar-vermelho');
 
-                if (cmd === 'resetar') { tempo = 600; clearInterval(timer); rodando = false; }
-                if (cmd === 'acrescentar1') { tempo += 60; }
+                if (cmd === 'resetar') { 
+                    tempo = 600; 
+                    clearInterval(timer); 
+                    rodando = false; 
+                }
+
+                if (cmd === 'acrescentar1') { 
+                    tempo += 60; 
+                }
                 
                 atualizarDisplay();
+                document.body.style.backgroundColor = "black";
             }
         }
 
-        // Nova estratégia: Apenas o Socket dispara a ação. 
-        // Quem clica apenas "avisa" ao servidor que quer executar.
+        // Emite o comando via Socket
         function enviar(cmd) {
             socket.emit('comando', cmd);
         }
 
-        // O comando só é executado quando chega via socket
+        // Recebe a instrução do servidor (evita disparo duplo local)
         socket.on('comando', (cmd) => {
             executarComando(cmd);
         });
