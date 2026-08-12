@@ -23,6 +23,7 @@
             cursor: pointer;
         }
 
+        /* Animação de piscar com fundo vermelho */
         @keyframes piscar {
             0% { background-color: #ff0000; }
             50% { background-color: #000000; }
@@ -42,6 +43,7 @@
             overflow: hidden;
         }
 
+        /* Números gigantes */
         #display { 
             font-size: 82vh; 
             font-family: 'Arial Black', Impact, sans-serif; 
@@ -68,10 +70,10 @@
             opacity: 1;
         }
 
-        /* Oculta os botões quando necessário */
+        /* Oculta os botões quando ativado */
         .ocultar-controles {
             opacity: 0 !important;
-            pointer-events: none;
+            pointer-events: none !important;
         }
 
         button { 
@@ -109,10 +111,10 @@
     <audio id="somSirene" src="Apito.mp3"></audio>
 
     <div id="controles">
-        <button class="btn-iniciar" onmousedown="enviar('iniciar')" ontouchstart="enviar('iniciar'); event.preventDefault();">INICIAR</button>
-        <button class="btn-pausar" onmousedown="enviar('pausar')" ontouchstart="enviar('pausar'); event.preventDefault();">PAUSAR</button>
-        <button class="btn-mais" onmousedown="enviar('acrescentar1')" ontouchstart="enviar('acrescentar1'); event.preventDefault();">+1 MIN</button>
-        <button class="btn-reset" onmousedown="enviar('resetar')" ontouchstart="enviar('resetar'); event.preventDefault();">RESETAR</button>
+        <button class="btn-iniciar" onmousedown="enviar('iniciar', event)" ontouchstart="enviar('iniciar', event)">INICIAR</button>
+        <button class="btn-pausar" onmousedown="enviar('pausar', event)" ontouchstart="enviar('pausar', event)">PAUSAR</button>
+        <button class="btn-mais" onmousedown="enviar('acrescentar1', event)" ontouchstart="enviar('acrescentar1', event)">+1 MIN</button>
+        <button class="btn-reset" onmousedown="enviar('resetar', event)" ontouchstart="enviar('resetar', event)">RESETAR</button>
     </div>
 
     <script>
@@ -123,7 +125,6 @@
         let tempo = 600; 
         let rodando = false;
         let timer;
-        let telaCheiaAtiva = false;
 
         function atualizarDisplay() {
             let m = Math.floor(tempo / 60);
@@ -131,27 +132,28 @@
             display.innerText = `${m}:${s < 10 ? '0'+s : s}`;
         }
 
-        // Reaparece os botões ao clicar na tela quando em tela cheia
-        document.body.addEventListener('click', () => {
-            if (telaCheiaAtiva) {
-                controles.classList.remove('ocultar-controles');
+        // Alterna a visibilidade dos botões ao clicar em qualquer lugar fora dos botões
+        document.body.addEventListener('click', (e) => {
+            if (!controles.contains(e.target)) {
+                controles.classList.toggle('ocultar-controles');
             }
         });
 
         function executarComando(cmd) {
+            // INICIAR
             if (cmd === 'iniciar' && !rodando) {
                 rodando = true;
                 if (sirene) sirene.play().catch(e => console.log(e));
                 
+                // Entra em tela cheia
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen().catch(err => console.log(err));
-                    telaCheiaAtiva = true;
-                    // Esconde os botões após entrar em tela cheia
-                    setTimeout(() => {
-                        controles.classList.add('ocultar-controles');
-                    }, 500);
                 }
 
+                // Esconde os botões após iniciar
+                controles.classList.add('ocultar-controles');
+
+                // Pisca a tela em vermelho por 10s no início
                 document.body.classList.add('piscar-vermelho');
                 setTimeout(() => {
                     document.body.classList.remove('piscar-vermelho');
@@ -168,6 +170,7 @@
 
                         if (sirene) sirene.play().catch(e => console.log(e));
 
+                        // Pisca a tela em vermelho por 10s ao zerar
                         document.body.classList.add('piscar-vermelho');
                         setTimeout(() => { 
                             document.body.classList.remove('piscar-vermelho');
@@ -177,11 +180,13 @@
                 }, 1000);
             }
 
+            // PAUSAR
             if (cmd === 'pausar' && rodando) {
                 clearInterval(timer);
                 rodando = false;
             }
 
+            // RESETAR / +1 MIN
             if (cmd === 'resetar' || cmd === 'acrescentar1') {
                 if (sirene) { sirene.pause(); sirene.currentTime = 0; }
                 document.body.classList.remove('piscar-vermelho');
@@ -190,7 +195,6 @@
                     tempo = 600; 
                     clearInterval(timer); 
                     rodando = false; 
-                    telaCheiaAtiva = false;
                     controles.classList.remove('ocultar-controles');
                 }
 
@@ -203,10 +207,16 @@
             }
         }
 
-        function enviar(cmd) {
+        // Envia o comando tratando o evento para não se propagar
+        function enviar(cmd, e) {
+            if (e) {
+                e.stopPropagation();
+                if (e.type === 'touchstart') e.preventDefault();
+            }
             socket.emit('comando', cmd);
         }
 
+        // Recebe o comando via Socket
         socket.on('comando', (cmd) => {
             executarComando(cmd);
         });
