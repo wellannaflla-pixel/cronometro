@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Placar Futsal - Máximo Ocupação</title>
+    <title>Placar Futsal - Tela Cheia Adaptável</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
         * {
@@ -20,9 +20,9 @@
             overflow: hidden; 
             font-family: sans-serif;
             transition: background-color 0.2s; 
+            cursor: pointer;
         }
 
-        /* Animação de piscar com fundo vermelho */
         @keyframes piscar {
             0% { background-color: #ff0000; }
             50% { background-color: #000000; }
@@ -33,7 +33,6 @@
             animation: piscar 0.5s infinite;
         }
 
-        /* Container central do placar expandido */
         #display-container { 
             flex: 1; 
             display: flex; 
@@ -43,7 +42,6 @@
             overflow: hidden;
         }
 
-        /* Números no maior tamanho possível com 50% menos brilho */
         #display { 
             font-size: 82vh; 
             font-family: 'Arial Black', Impact, sans-serif; 
@@ -53,14 +51,12 @@
             user-select: none;
             text-align: center;
             color: #ffffff;
-            /* Brilho reduzido em 50% */
             text-shadow: 
                 0 0 5px #ffffff,
                 0 0 15px #ffff00,
                 0 0 30px #ffcc00;
         }
 
-        /* Rodapé de controles 40% menor */
         #controles { 
             display: flex; 
             gap: 6px; 
@@ -68,6 +64,14 @@
             background: #0a0a0a; 
             width: 100%;
             z-index: 10;
+            transition: opacity 0.3s ease;
+            opacity: 1;
+        }
+
+        /* Oculta os botões quando necessário */
+        .ocultar-controles {
+            opacity: 0 !important;
+            pointer-events: none;
         }
 
         button { 
@@ -104,7 +108,6 @@
     
     <audio id="somSirene" src="Apito.mp3"></audio>
 
-    <!-- Botões com resposta rápida via mousedown/touchstart -->
     <div id="controles">
         <button class="btn-iniciar" onmousedown="enviar('iniciar')" ontouchstart="enviar('iniciar'); event.preventDefault();">INICIAR</button>
         <button class="btn-pausar" onmousedown="enviar('pausar')" ontouchstart="enviar('pausar'); event.preventDefault();">PAUSAR</button>
@@ -116,9 +119,11 @@
         const socket = io();
         const sirene = document.getElementById('somSirene');
         const display = document.getElementById('display');
+        const controles = document.getElementById('controles');
         let tempo = 600; 
         let rodando = false;
         let timer;
+        let telaCheiaAtiva = false;
 
         function atualizarDisplay() {
             let m = Math.floor(tempo / 60);
@@ -126,18 +131,27 @@
             display.innerText = `${m}:${s < 10 ? '0'+s : s}`;
         }
 
+        // Reaparece os botões ao clicar na tela quando em tela cheia
+        document.body.addEventListener('click', () => {
+            if (telaCheiaAtiva) {
+                controles.classList.remove('ocultar-controles');
+            }
+        });
+
         function executarComando(cmd) {
-            // INICIAR
             if (cmd === 'iniciar' && !rodando) {
                 rodando = true;
                 if (sirene) sirene.play().catch(e => console.log(e));
                 
-                // Ativa Tela Cheia
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen().catch(err => console.log(err));
+                    telaCheiaAtiva = true;
+                    // Esconde os botões após entrar em tela cheia
+                    setTimeout(() => {
+                        controles.classList.add('ocultar-controles');
+                    }, 500);
                 }
 
-                // Pisca a tela em vermelho por 10 segundos no início
                 document.body.classList.add('piscar-vermelho');
                 setTimeout(() => {
                     document.body.classList.remove('piscar-vermelho');
@@ -154,7 +168,6 @@
 
                         if (sirene) sirene.play().catch(e => console.log(e));
 
-                        // Pisca a tela em vermelho por 10 segundos ao zerar
                         document.body.classList.add('piscar-vermelho');
                         setTimeout(() => { 
                             document.body.classList.remove('piscar-vermelho');
@@ -164,13 +177,11 @@
                 }, 1000);
             }
 
-            // PAUSAR
             if (cmd === 'pausar' && rodando) {
                 clearInterval(timer);
                 rodando = false;
             }
 
-            // RESETAR ou ACRESCENTAR 1 MIN
             if (cmd === 'resetar' || cmd === 'acrescentar1') {
                 if (sirene) { sirene.pause(); sirene.currentTime = 0; }
                 document.body.classList.remove('piscar-vermelho');
@@ -179,6 +190,8 @@
                     tempo = 600; 
                     clearInterval(timer); 
                     rodando = false; 
+                    telaCheiaAtiva = false;
+                    controles.classList.remove('ocultar-controles');
                 }
 
                 if (cmd === 'acrescentar1') { 
@@ -190,12 +203,10 @@
             }
         }
 
-        // Envia o comando via Socket
         function enviar(cmd) {
             socket.emit('comando', cmd);
         }
 
-        // Recebe o comando via Socket
         socket.on('comando', (cmd) => {
             executarComando(cmd);
         });
