@@ -59,6 +59,18 @@
                 0 0 30px #04fa04;
         }
 
+        .display-verde {
+            text-shadow: 0 0 5px #ffffff, 0 0 15px #04fa04, 0 0 30px #04fa04;
+        }
+
+        .display-amarelo {
+            text-shadow: 0 0 5px #ffffff, 0 0 15px #f5d300, 0 0 30px #f5d300;
+        }
+
+        .display-vermelho {
+            text-shadow: 0 0 5px #ffffff, 0 0 15px #ff2a2a, 0 0 30px #ff2a2a;
+        }
+
         #controles { 
             display: flex; 
             gap: 6px; 
@@ -122,16 +134,25 @@
         const sirene = document.getElementById('somSirene');
         const display = document.getElementById('display');
         const controles = document.getElementById('controles');
-        let tempo = 600;
+        let tempo = 600; 
         let rodando = false;
-        let timer = null;
-        let ultimoTimestamp = 0;
+        let timer;
+
+        function atualizarCorDisplay() {
+            if (tempo >= 360) {
+                display.style.textShadow = '0 0 5px #ffffff, 0 0 15px #04fa04, 0 0 30px #04fa04';
+            } else if (tempo >= 180) {
+                display.style.textShadow = '0 0 5px #ffffff, 0 0 15px #f5d300, 0 0 30px #f5d300';
+            } else {
+                display.style.textShadow = '0 0 5px #ffffff, 0 0 15px #ff2a2a, 0 0 30px #ff2a2a';
+            }
+        }
 
         function atualizarDisplay() {
-            const totalSegundos = Math.max(0, Math.floor(tempo));
-            const m = Math.floor(totalSegundos / 60);
-            const s = totalSegundos % 60;
-            display.innerText = `${m}:${s < 10 ? '0' + s : s}`;
+            let m = Math.floor(tempo / 60);
+            let s = tempo % 60;
+            display.innerText = `${m}:${s < 10 ? '0'+s : s}`;
+            atualizarCorDisplay();
         }
 
         // Alterna a visibilidade dos botões ao clicar em qualquer lugar fora dos botões
@@ -141,46 +162,21 @@
             }
         });
 
-        function pararTimer() {
-            if (timer) {
-                clearInterval(timer);
-                timer = null;
-            }
-        }
-
-        function finalizarCronometro() {
-            pararTimer();
-            rodando = false;
-            tempo = 0;
-            atualizarDisplay();
-
-            if (sirene) sirene.play().catch(e => console.log(e));
-
-            document.body.classList.add('piscar-vermelho');
-            setTimeout(() => {
-                document.body.classList.remove('piscar-vermelho');
-                document.body.style.backgroundColor = "black";
-            }, 10000);
-        }
-
         function executarComando(cmd) {
             // INICIAR
             if (cmd === 'iniciar' && !rodando) {
-                if (tempo <= 0) {
-                    tempo = 600;
-                }
-
                 rodando = true;
-                ultimoTimestamp = Date.now();
-
                 if (sirene) sirene.play().catch(e => console.log(e));
-
+                
+                // Entra em tela cheia
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen().catch(err => console.log(err));
                 }
 
+                // Esconde os botões após iniciar
                 controles.classList.add('ocultar-controles');
 
+                // Pisca a tela em vermelho por 10s no início
                 document.body.classList.add('piscar-vermelho');
                 setTimeout(() => {
                     document.body.classList.remove('piscar-vermelho');
@@ -188,44 +184,47 @@
                 }, 10000);
 
                 timer = setInterval(() => {
-                    const agora = Date.now();
-                    const diferenca = (agora - ultimoTimestamp) / 1000;
-                    ultimoTimestamp = agora;
-
                     if (tempo > 0) {
-                        tempo = Math.max(0, tempo - diferenca);
+                        tempo--;
                         atualizarDisplay();
-                    }
+                    } else {
+                        clearInterval(timer);
+                        rodando = false;
 
-                    if (tempo <= 0) {
-                        finalizarCronometro();
+                        if (sirene) sirene.play().catch(e => console.log(e));
+
+                        // Pisca a tela em vermelho por 10s ao zerar
+                        document.body.classList.add('piscar-vermelho');
+                        setTimeout(() => { 
+                            document.body.classList.remove('piscar-vermelho');
+                            document.body.style.backgroundColor = "black";
+                        }, 10000);
                     }
-                }, 200);
+                }, 1000);
             }
 
             // PAUSAR
             if (cmd === 'pausar' && rodando) {
-                pararTimer();
+                clearInterval(timer);
                 rodando = false;
-                atualizarDisplay();
             }
 
             // RESETAR / +1 MIN
             if (cmd === 'resetar' || cmd === 'acrescentar1') {
                 if (sirene) { sirene.pause(); sirene.currentTime = 0; }
                 document.body.classList.remove('piscar-vermelho');
-                pararTimer();
-                rodando = false;
 
-                if (cmd === 'resetar') {
-                    tempo = 600;
+                if (cmd === 'resetar') { 
+                    tempo = 600; 
+                    clearInterval(timer); 
+                    rodando = false; 
                     controles.classList.remove('ocultar-controles');
                 }
 
-                if (cmd === 'acrescentar1') {
-                    tempo += 60;
+                if (cmd === 'acrescentar1') { 
+                    tempo += 60; 
                 }
-
+                
                 atualizarDisplay();
                 document.body.style.backgroundColor = "black";
             }
@@ -244,8 +243,6 @@
         socket.on('comando', (cmd) => {
             executarComando(cmd);
         });
-
-        atualizarDisplay();
     </script>
 </body>
 </html>
