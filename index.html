@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cronometro Personalizado</title>
+    <title>Cronometro</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
         * {
@@ -45,18 +45,18 @@
 
         /* Números gigantes */
         #display { 
-            font-size: 90vh; 
+            font-size: 82vh; 
             font-family: 'Arial Black', Impact, sans-serif; 
             font-weight: 900; 
-            line-height: 0.4; 
-            letter-spacing: -9px; 
+            line-height: 0.8; 
+            letter-spacing: -12px; 
             user-select: none;
             text-align: center;
             color: #ffffff;
             text-shadow: 
-                0 0 3px #ffffff,
-                0 0 8px #01f80e,
-                0 0 15px #01f80e;
+                0 0 5px #ffffff,
+                0 0 15px #04fa04,
+                0 0 30px #04fa04;
         }
 
         #controles { 
@@ -153,12 +153,12 @@
                 // Esconde os botões após iniciar
                 controles.classList.add('ocultar-controles');
 
-                // Pisca a tela em vermelho por 0.5s no início
+                // Pisca a tela em vermelho por 10s no início
                 document.body.classList.add('piscar-vermelho');
                 setTimeout(() => {
                     document.body.classList.remove('piscar-vermelho');
                     document.body.style.backgroundColor = "black";
-                }, 500);
+                }, 10000);
 
                 timer = setInterval(() => {
                     if (tempo > 0) {
@@ -170,14 +170,14 @@
 
                         if (sirene) sirene.play().catch(e => console.log(e));
 
-                        // Pisca a tela em vermelho por 0.5s ao zerar
+                        // Pisca a tela em vermelho por 10s ao zerar
                         document.body.classList.add('piscar-vermelho');
                         setTimeout(() => { 
                             document.body.classList.remove('piscar-vermelho');
                             document.body.style.backgroundColor = "black";
-                        }, 500);
+                        }, 10000);
                     }
-                }, 500);
+                }, 1000);
             }
 
             // PAUSAR
