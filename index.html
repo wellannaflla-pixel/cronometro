@@ -45,11 +45,11 @@
 
         /* Números gigantes */
         #display { 
-            font-size: 82vh; 
+            font-size: 90vh; 
             font-family: 'Arial Black', Impact, sans-serif; 
             font-weight: 900; 
-            line-height: 0.8; 
-            letter-spacing: -12px; 
+            line-height: 0.4; 
+            letter-spacing: -9px; 
             user-select: none;
             text-align: center;
             color: #ffffff;
@@ -153,12 +153,12 @@
                 // Esconde os botões após iniciar
                 controles.classList.add('ocultar-controles');
 
-                // Pisca a tela em vermelho por 10s no início
+                // Pisca a tela em vermelho por 0.5s no início
                 document.body.classList.add('piscar-vermelho');
                 setTimeout(() => {
                     document.body.classList.remove('piscar-vermelho');
                     document.body.style.backgroundColor = "black";
-                }, 10000);
+                }, 500);
 
                 timer = setInterval(() => {
                     if (tempo > 0) {
@@ -170,14 +170,14 @@
 
                         if (sirene) sirene.play().catch(e => console.log(e));
 
-                        // Pisca a tela em vermelho por 10s ao zerar
+                        // Pisca a tela em vermelho por 0.5s ao zerar
                         document.body.classList.add('piscar-vermelho');
                         setTimeout(() => { 
                             document.body.classList.remove('piscar-vermelho');
                             document.body.style.backgroundColor = "black";
-                        }, 10000);
+                        }, 500);
                     }
-                }, 1000);
+                }, 500);
             }
 
             // PAUSAR
